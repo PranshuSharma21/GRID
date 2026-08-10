@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRID - Tenant Dashboard</title>
+    <title>Tenant Dashboard</title>
     <style>
         * {
             box-sizing: border-box;
@@ -368,7 +368,7 @@
         </div>
 
         <div class="alert-banner" id="alertBanner">
-            ⚠️ CRITICAL ALERT: Sensor breach detected! Active safety protocols initiated.
+            ⚠️ CRITICAL ALERT: Low Water Pressure Detected! Check physical supply valve.
         </div>
 
         <div class="grid-metrics">
@@ -425,7 +425,7 @@
             <div class="logs-title">Diagnostic Telemetry Feed</div>
             <div class="logs-container" id="logsFeed">
                 <div class="log-item">
-                    <span>Dashboard initialized. Awaiting ESP websocket packet feed.</span>
+                    <span>Dashboard initialized. Awaiting live ESP packet feed.</span>
                     <span class="log-time">Just now</span>
                 </div>
             </div>
@@ -532,61 +532,64 @@
         const valHumidity = document.getElementById("valHumidity");
         const statusHumidity = document.getElementById("statusHumidity");
 
-        socket.on("connect", () => {
+        let offlineTimeout = null;
+
+        function setHardwareOnline() {
             connStatus.style.background = "rgba(52, 211, 153, 0.15)";
             connStatus.style.borderColor = "rgba(52, 211, 153, 0.4)";
             connStatus.style.color = "#34d399";
             connDot.style.backgroundColor = "#34d399";
             connDot.style.boxShadow = "0 0 10px #34d399";
-            connText.innerText = "Hardware Connected";
-            addLog("Websocket link established with GRID Cloud.");
-        });
+            connText.innerText = "Hardware Online";
 
-        socket.on("disconnect", () => {
-            connStatus.style.background = "rgba(244, 63, 94, 0.15)";
-            connStatus.style.borderColor = "rgba(244, 63, 94, 0.4)";
-            connStatus.style.color = "#f43f5e";
-            connDot.style.backgroundColor = "#f43f5e";
-            connDot.style.boxShadow = "0 0 10px #f43f5e";
-            connText.innerText = "Hardware Offline";
-            addLog("Hardware connection lost. Reconnecting...");
-        });
+            if (offlineTimeout) clearTimeout(offlineTimeout);
+            offlineTimeout = setTimeout(() => {
+                connStatus.style.background = "rgba(244, 63, 94, 0.15)";
+                connStatus.style.borderColor = "rgba(244, 63, 94, 0.4)";
+                connStatus.style.color = "#f43f5e";
+                connDot.style.backgroundColor = "#f43f5e";
+                connDot.style.boxShadow = "0 0 10px #f43f5e";
+                connText.innerText = "Hardware Offline";
+            }, 10000);
+        }
 
         socket.on("telemetry_update", (data) => {
-            if (data.waterPressure !== undefined) {
-                valWater.innerText = `${data.waterPressure} PSI`;
-                pushChartData(chartWater, data.waterPressure);
+            setHardwareOnline();
+            let isAlert = false;
+
+            const waterVal = data.waterPressure !== undefined ? data.waterPressure : data.water;
+            if (waterVal !== undefined) {
+                valWater.innerText = `${waterVal} PSI`;
+                pushChartData(chartWater, waterVal);
                 
-                if (data.waterPressure < 20) {
-                    statusWater.innerText = "Leak Detected / Low Pressure";
+                if (waterVal < 20) {
+                    statusWater.innerText = "Low Pressure / Leak Risk";
                     statusWater.style.color = "#f43f5e";
-                    triggerAlert(true);
+                    isAlert = true;
                 } else {
                     statusWater.innerText = "Optimal Sensor Pressure";
                     statusWater.style.color = "#34d399";
                 }
             }
 
-            if (data.humidity !== undefined) {
-                valHumidity.innerText = `${data.humidity} %`;
-                pushChartData(chartHumidity, data.humidity);
+            const humVal = data.humidity !== undefined ? data.humidity : data.hum;
+            if (humVal !== undefined) {
+                valHumidity.innerText = `${humVal} %`;
+                pushChartData(chartHumidity, humVal);
                 
-                if (data.humidity > 70) {
+                if (humVal > 70) {
                     statusHumidity.innerText = "High Moisture Warning";
                     statusHumidity.style.color = "#f43f5e";
-                    triggerAlert(true);
+                    isAlert = true;
                 } else {
                     statusHumidity.innerText = "Optimal Humidity";
                     statusHumidity.style.color = "#34d399";
                 }
             }
 
-            addLog(`Live ESP packet: Water=${data.waterPressure ?? '--'}PSI, Humidity=${data.humidity ?? '--'}%`);
+            alertBanner.style.display = isAlert ? "block" : "none";
+            addLog(`Live ESP packet: Water=${waterVal ?? '--'}, Hum=${humVal ?? '--'}%, Temp=${data.temp ?? '--'}°C`);
         });
-
-        function triggerAlert(show) {
-            alertBanner.style.display = show ? "block" : "none";
-        }
 
         function addLog(message) {
             const time = new Date().toLocaleTimeString();
