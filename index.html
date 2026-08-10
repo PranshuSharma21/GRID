@@ -508,6 +508,49 @@
             padding-top: 16px;
         }
 
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+        }
+
+        .back-to-top svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
         @media (max-width: 850px) {
             .features-section {
                 grid-template-columns: 1fr;
@@ -638,6 +681,12 @@
         </div>
     </div>
 
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </button>
+
     <script>
         const links = document.querySelectorAll(".nav-link");
         const current = window.location.pathname.split("/").pop() || "index.html";
@@ -661,6 +710,22 @@
                 if (!isActive) {
                     item.classList.add('active');
                 }
+            });
+        });
+
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 0) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         });
 
