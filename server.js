@@ -16,9 +16,10 @@ const io = new Server(server, {
 });
 
 let latestTelemetry = {
+  water_level: null,
   waterPressure: null,
   humidity: null,
-  temp: null,
+  temperature: null,
   voltage: 230,
   anomaly: null,
   lastSeen: null
@@ -39,7 +40,7 @@ app.post('/api/telemetry', (req, res) => {
   const WATER_THRESHOLD = parseInt(process.env.WATER_THRESHOLD) || 300;
   const TEMP_THRESHOLD = parseFloat(process.env.TEMP_THRESHOLD) || 45.0;
 
-  const waterVal = data.waterPressure !== undefined ? data.waterPressure : (data.water !== undefined ? data.water : data.water_level);
+  const waterVal = data.water_level !== undefined ? data.water_level : (data.waterPressure !== undefined ? data.waterPressure : data.water);
   const humVal = data.humidity !== undefined ? data.humidity : data.hum;
   const tempVal = data.temperature !== undefined ? data.temperature : data.temp;
 
@@ -51,11 +52,10 @@ app.post('/api/telemetry', (req, res) => {
   }
 
   latestTelemetry = {
+    water_level: waterVal !== undefined ? waterVal : latestTelemetry.water_level,
     waterPressure: waterVal !== undefined ? waterVal : latestTelemetry.waterPressure,
     humidity: humVal !== undefined ? humVal : latestTelemetry.humidity,
-    temp: tempVal !== undefined ? tempVal : latestTelemetry.temp,
-    water: waterVal !== undefined ? waterVal : latestTelemetry.waterPressure,
-    hum: humVal !== undefined ? humVal : latestTelemetry.humidity,
+    temperature: tempVal !== undefined ? tempVal : latestTelemetry.temperature,
     voltage: data.voltage || latestTelemetry.voltage,
     anomaly: anomaly,
     lastSeen: new Date().toISOString()
