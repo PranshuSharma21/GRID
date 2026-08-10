@@ -233,6 +233,19 @@
             box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
         }
 
+        .status-message {
+            display: none;
+            margin-top: 20px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            background: rgba(52, 211, 153, 0.15);
+            border: 1px solid rgba(52, 211, 153, 0.4);
+            color: #34d399;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
         @media (max-width: 600px) {
             .notify-form {
                 flex-direction: column;
@@ -262,12 +275,14 @@
         <div class="beta-card">
             <div class="badge">In Development</div>
             <h1 class="beta-title">COMING SOON</h1>
-            <p class="beta-subtitle">We are currently crafting GRID 2.0 with advanced predictive AI models and real time automated relay triggers. Be the first to know when early access opens.</p>
+            <p class="beta-subtitle">We are currently crafting GRID 2.0 with advanced predictive AI models and real-time automated relay triggers. Be the first to know when early access opens.</p>
 
-            <form action="https://formspree.io/f/mbgrgzgo" method="POST" class="notify-form">
+            <form id="betaForm" class="notify-form">
                 <input type="email" name="email" class="notify-input" placeholder="Enter your email" required>
-                <button type="submit" class="notify-btn">Notify Me</button>
+                <button type="submit" class="notify-btn" id="notifyBtn">Notify Me</button>
             </form>
+
+            <div id="statusMsg" class="status-message">Thanks! Your entry was submitted successfully.</div>
         </div>
     </div>
 
@@ -283,6 +298,38 @@
                 links.forEach(l => l.classList.remove("active"));
                 this.classList.add("active");
             });
+        });
+
+        const form = document.getElementById("betaForm");
+        const statusMsg = document.getElementById("statusMsg");
+        const notifyBtn = document.getElementById("notifyBtn");
+
+        form.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            notifyBtn.innerText = "Submitting...";
+            notifyBtn.disabled = true;
+
+            const data = new FormData(form);
+            const response = await fetch("https://formspree.io/f/mbgrgzgo", {
+                method: "POST",
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                form.reset();
+                statusMsg.style.display = "block";
+                notifyBtn.innerText = "Notify Me";
+                notifyBtn.disabled = false;
+            } else {
+                statusMsg.style.display = "block";
+                statusMsg.style.borderColor = "rgba(244, 63, 94, 0.4)";
+                statusMsg.style.background = "rgba(244, 63, 94, 0.15)";
+                statusMsg.style.color = "#f43f5e";
+                statusMsg.innerText = "Oops! There was a problem submitting your entry.";
+                notifyBtn.innerText = "Notify Me";
+                notifyBtn.disabled = false;
+            }
         });
     </script>
 </body>
