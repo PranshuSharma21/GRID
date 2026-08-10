@@ -1,1 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID - Tenant Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        body {
+            background-color: #030014;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px);
+            z-index: -2;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(120, 53, 15, 0) 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+            50% { transform: translate(-45%, -55%) scale(1.2); opacity: 0.85; }
+            100% { transform: translate(-55%, -45%) scale(1); opacity: 0.6; }
+        }
+
+        .nav-container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            z-index: 10;
+        }
+
+        .nav-box {
+            display: inline-flex;
+            gap: 16px;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 999px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #111;
+            font-size: 18px;
+            padding: 16px 32px;
+            border-radius: 999px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: 0.6s;
+            z-index: 1;
+        }
+
+        .nav-link:hover::before, .nav-link.active::before { opacity: 1; }
+        .nav-link:hover::after { left: 120%; }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.5);
+        }
+
+        .nav-link span { position: relative; z-index: 2; }
+
+        .dashboard-container {
+            width: 90%;
+            max-width: 1100px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 20px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .tenant-title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tenant-title p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: #f43f5e;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #f43f5e;
+            box-shadow: 0 0 10px #f43f5e;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .alert-banner {
+            display: none;
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.5);
+            border-radius: 16px;
+            padding: 16px 24px;
+            color: #f43f5e;
+            font-weight: 600;
+            animation: pulseAlert 2s infinite alternate;
+        }
+
+        @keyframes pulseAlert {
+            from { box-shadow: 0 0 10px rgba(244, 63, 94, 0.2); }
+            to { box-shadow: 0 0 25px rgba(244, 63, 94, 0.6); }
+        }
+
+        .grid-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .metric-status {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #34d399;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 80px;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .logs-section {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .logs-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .logs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .log-time {
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.8);
+        }
+
+        .back-to-top svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        @media (max-width: 768px) {
+            .header-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="nav-container">
+        <div class="nav-box">
+            <a href="index.html" class="nav-link"><span>Home</span></a>
+            <a href="about.html" class="nav-link"><span>About Us</span></a>
+            <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+            <a href="contact.html" class="nav-link"><span>Contact Us</span></a>
+            <a href="beta.html" class="nav-link"><span>Beta Version</span></a>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="header-bar">
+            <div class="tenant-title">
+                <h1>Apartment 4B - Health Center</h1>
+                <p>Live ESP Hardware Diagnostic Telemetry</p>
+            </div>
+            <div class="status-badge" id="connStatus">
+                <div class="status-dot" id="connDot"></div>
+                <span id="connText">Hardware Offline</span>
+            </div>
+        </div>
+
+        <div class="alert-banner" id="alertBanner">
+            ⚠️ CRITICAL ALERT: Sensor breach detected! Active safety protocols initiated.
+        </div>
+
+        <div class="grid-metrics">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Mains Voltage</span>
+                    <span>⚡</span>
+                </div>
+                <div class="metric-value" id="valVoltage">230 V</div>
+                <div class="metric-status" id="statusVoltage">Normal (Simulated)</div>
+                <div class="chart-container">
+                    <canvas id="chartVoltage"></canvas>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Water Pressure</span>
+                    <span>💧</span>
+                </div>
+                <div class="metric-value" id="valWater">--</div>
+                <div class="metric-status" id="statusWater" style="color: #64748b;">Awaiting Sensor Data</div>
+                <div class="chart-container">
+                    <canvas id="chartWater"></canvas>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>HVAC Pressure</span>
+                    <span>🌀</span>
+                </div>
+                <div class="metric-value" style="color: #64748b;">--</div>
+                <div class="metric-status" style="color: #64748b;">Sensor Disconnected</div>
+                <div class="chart-container">
+                    <canvas id="chartHvac"></canvas>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span>Indoor Humidity</span>
+                    <span>🌡️</span>
+                </div>
+                <div class="metric-value" id="valHumidity">--</div>
+                <div class="metric-status" id="statusHumidity" style="color: #64748b;">Awaiting Sensor Data</div>
+                <div class="chart-container">
+                    <canvas id="chartHumidity"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-section">
+            <div class="logs-title">Diagnostic Telemetry Feed</div>
+            <div class="logs-container" id="logsFeed">
+                <div class="log-item">
+                    <span>Dashboard initialized. Awaiting ESP websocket packet feed.</span>
+                    <span class="log-time">Just now</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="backToTop" class="back-to-top" aria-label="Back to top">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </button>
+
+    <script>
+        const links = document.querySelectorAll(".nav-link");
+        const current = window.location.pathname.split("/").pop() || "dashboard.html";
+
+        links.forEach(link => {
+            if (link.getAttribute("href") === current) {
+                link.classList.add("active");
+            }
+            link.addEventListener("click", function () {
+                links.forEach(l => l.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 0) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        const maxPoints = 12;
+        const labels = Array(maxPoints).fill('');
+
+        const createChart = (canvasId, color) => {
+            return new Chart(document.getElementById(canvasId), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: Array(maxPoints).fill(null),
+                        borderColor: color,
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+        };
+
+        const chartVoltage = createChart('chartVoltage', '#a855f7');
+        const chartWater = createChart('chartWater', '#38bdf8');
+        const chartHvac = createChart('chartHvac', '#64748b');
+        const chartHumidity = createChart('chartHumidity', '#34d399');
+
+        function pushChartData(chart, value) {
+            chart.data.datasets[0].data.push(value);
+            if (chart.data.datasets[0].data.length > maxPoints) {
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update('none');
+        }
+
+        setInterval(() => {
+            const fakeVoltage = Math.floor(228 + Math.random() * 5);
+            valVoltage.innerText = `${fakeVoltage} V`;
+            pushChartData(chartVoltage, fakeVoltage);
+        }, 2000);
+
+        const socket = io("https://grid-telemetry.onrender.com", {
+            transports: ["websocket", "polling"],
+            reconnection: true
+        });
+
+        const connStatus = document.getElementById("connStatus");
+        const connDot = document.getElementById("connDot");
+        const connText = document.getElementById("connText");
+        const alertBanner = document.getElementById("alertBanner");
+        const logsFeed = document.getElementById("logsFeed");
+
+        const valWater = document.getElementById("valWater");
+        const statusWater = document.getElementById("statusWater");
+        const valHumidity = document.getElementById("valHumidity");
+        const statusHumidity = document.getElementById("statusHumidity");
+
+        socket.on("connect", () => {
+            connStatus.style.background = "rgba(52, 211, 153, 0.15)";
+            connStatus.style.borderColor = "rgba(52, 211, 153, 0.4)";
+            connStatus.style.color = "#34d399";
+            connDot.style.backgroundColor = "#34d399";
+            connDot.style.boxShadow = "0 0 10px #34d399";
+            connText.innerText = "Hardware Connected";
+            addLog("Websocket link established with GRID Cloud.");
+        });
+
+        socket.on("disconnect", () => {
+            connStatus.style.background = "rgba(244, 63, 94, 0.15)";
+            connStatus.style.borderColor = "rgba(244, 63, 94, 0.4)";
+            connStatus.style.color = "#f43f5e";
+            connDot.style.backgroundColor = "#f43f5e";
+            connDot.style.boxShadow = "0 0 10px #f43f5e";
+            connText.innerText = "Hardware Offline";
+            addLog("Hardware connection lost. Reconnecting...");
+        });
+
+        socket.on("telemetry_update", (data) => {
+            if (data.waterPressure !== undefined) {
+                valWater.innerText = `${data.waterPressure} PSI`;
+                pushChartData(chartWater, data.waterPressure);
+                
+                if (data.waterPressure < 20) {
+                    statusWater.innerText = "Leak Detected / Low Pressure";
+                    statusWater.style.color = "#f43f5e";
+                    triggerAlert(true);
+                } else {
+                    statusWater.innerText = "Optimal Sensor Pressure";
+                    statusWater.style.color = "#34d399";
+                }
+            }
+
+            if (data.humidity !== undefined) {
+                valHumidity.innerText = `${data.humidity} %`;
+                pushChartData(chartHumidity, data.humidity);
+                
+                if (data.humidity > 70) {
+                    statusHumidity.innerText = "High Moisture Warning";
+                    statusHumidity.style.color = "#f43f5e";
+                    triggerAlert(true);
+                } else {
+                    statusHumidity.innerText = "Optimal Humidity";
+                    statusHumidity.style.color = "#34d399";
+                }
+            }
+
+            addLog(`Live ESP packet: Water=${data.waterPressure ?? '--'}PSI, Humidity=${data.humidity ?? '--'}%`);
+        });
+
+        function triggerAlert(show) {
+            alertBanner.style.display = show ? "block" : "none";
+        }
+
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString();
+            const logItem = document.createElement("div");
+            logItem.className = "log-item";
+            logItem.innerHTML = `<span>${message}</span><span class="log-time">${time}</span>`;
+            logsFeed.insertBefore(logItem, logsFeed.firstChild);
+        }
+    </script>
+</body>
+</html>
