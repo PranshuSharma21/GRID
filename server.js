@@ -2,10 +2,13 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.use(express.static(__dirname));
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -13,7 +16,7 @@ const io = new Server(server, {
 });
 
 app.get('/', (req, res) => {
-  res.send('GRID Backend Service Online');
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/api/telemetry', (req, res) => {
@@ -36,4 +39,4 @@ app.post('/api/telemetry', (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-server.listen(PORT, () => console.log(`GRID Backend running on port ${PORT}`));
+server.listen(PORT, () => console.log(`GRID Server running on port ${PORT}`));
