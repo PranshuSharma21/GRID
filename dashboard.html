@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenant Dashboard</title>
+    <title>GRID - Tenant Dashboard</title>
     <style>
         * {
             box-sizing: border-box;
@@ -147,6 +147,33 @@
             color: #94a3b8;
             font-size: 0.95rem;
             margin-top: 4px;
+        }
+
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .refresh-btn {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c084fc;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(168, 85, 247, 0.4);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+            color: #ffffff;
         }
 
         .status-badge {
@@ -361,9 +388,12 @@
                 <h1>Apartment 4B - Health Center</h1>
                 <p>Live ESP Hardware Diagnostic Telemetry</p>
             </div>
-            <div class="status-badge" id="connStatus">
-                <div class="status-dot" id="connDot"></div>
-                <span id="connText">Hardware Offline</span>
+            <div class="controls-group">
+                <button class="refresh-btn" id="manualRefreshBtn">🔄 Refresh Data</button>
+                <div class="status-badge" id="connStatus">
+                    <div class="status-dot" id="connDot"></div>
+                    <span id="connText">Hardware Offline</span>
+                </div>
             </div>
         </div>
 
@@ -425,7 +455,7 @@
             <div class="logs-title">Diagnostic Telemetry Feed</div>
             <div class="logs-container" id="logsFeed">
                 <div class="log-item">
-                    <span>Dashboard initialized. Awaiting live ESP packet feed.</span>
+                    <span>Dashboard initialized. Auto-polling server every 3s.</span>
                     <span class="log-time">Just now</span>
                 </div>
             </div>
@@ -516,16 +546,12 @@
             pushChartData(chartVoltage, fakeVoltage);
         }, 2000);
 
-        const socket = io("https://grid-telemetry.onrender.com", {
-            transports: ["websocket", "polling"],
-            reconnection: true
-        });
-
         const connStatus = document.getElementById("connStatus");
         const connDot = document.getElementById("connDot");
         const connText = document.getElementById("connText");
         const alertBanner = document.getElementById("alertBanner");
         const logsFeed = document.getElementById("logsFeed");
+        const manualRefreshBtn = document.getElementById("manualRefreshBtn");
 
         const valWater = document.getElementById("valWater");
         const statusWater = document.getElementById("statusWater");
@@ -553,12 +579,13 @@
             }, 10000);
         }
 
-        socket.on("telemetry_update", (data) => {
+        function updateTelemetryUI(data) {
+            if (!data) return;
             setHardwareOnline();
             let isAlert = false;
 
             const waterVal = data.waterPressure !== undefined ? data.waterPressure : data.water;
-            if (waterVal !== undefined) {
+            if (waterVal !== undefined && waterVal !== null) {
                 valWater.innerText = `${waterVal} PSI`;
                 pushChartData(chartWater, waterVal);
                 
@@ -573,7 +600,7 @@
             }
 
             const humVal = data.humidity !== undefined ? data.humidity : data.hum;
-            if (humVal !== undefined) {
+            if (humVal !== undefined && humVal !== null) {
                 valHumidity.innerText = `${humVal} %`;
                 pushChartData(chartHumidity, humVal);
                 
@@ -588,7 +615,43 @@
             }
 
             alertBanner.style.display = isAlert ? "block" : "none";
-            addLog(`Live ESP packet: Water=${waterVal ?? '--'}, Hum=${humVal ?? '--'}%, Temp=${data.temp ?? '--'}°C`);
+        }
+
+        async function fetchLatestData() {
+            try {
+                const res = await fetch("https://grid-telemetry.onrender.com/api/telemetry/latest");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && (data.waterPressure !== null || data.water !== null || data.humidity !== null || data.hum !== null)) {
+                        updateTelemetryUI(data);
+                        addLog(`Polled latest ESP data: Water=${data.waterPressure || data.water || '--'}, Hum=${data.humidity || data.hum || '--'}%`);
+                    }
+                }
+            } catch (err) {
+                console.error("Auto-poll error:", err);
+            }
+        }
+
+        manualRefreshBtn.addEventListener("click", () => {
+            manualRefreshBtn.innerText = "⏳ Checking...";
+            fetchLatestData().finally(() => {
+                setTimeout(() => {
+                    manualRefreshBtn.innerText = "🔄 Refresh Data";
+                }, 500);
+            });
+        });
+
+        setInterval(fetchLatestData, 3000);
+        fetchLatestData();
+
+        const socket = io("https://grid-telemetry.onrender.com", {
+            transports: ["websocket", "polling"],
+            reconnection: true
+        });
+
+        socket.on("telemetry_update", (data) => {
+            updateTelemetryUI(data);
+            addLog(`WebSocket Packet: Water=${data.waterPressure || data.water || '--'}, Hum=${data.humidity || data.hum || '--'}%`);
         });
 
         function addLog(message) {
