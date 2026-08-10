@@ -21,7 +21,7 @@
             align-items: center;
             position: relative;
             overflow-x: hidden;
-            padding-bottom: 60px;
+            padding-bottom: 120px;
         }
 
         .bg-grid {
@@ -142,6 +142,7 @@
         .main-container {
             width: 100%;
             max-width: 1100px;
+            min-height: calc(100vh - 140px);
             z-index: 1;
             display: flex;
             flex-direction: column;
@@ -154,6 +155,9 @@
             width: 100%;
             height: 280px;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .particle-text {
@@ -214,6 +218,130 @@
             transform: translateY(-2px);
             box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
         }
+
+        .features-section {
+            width: 90%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 40px;
+            margin-top: 100px;
+            z-index: 1;
+            align-items: start;
+        }
+
+        .features-sidebar {
+            position: sticky;
+            top: 40px;
+        }
+
+        .features-sidebar h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .features-line {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #a855f7, transparent);
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .electric-border {
+            position: relative;
+            border-radius: 24px;
+            overflow: visible;
+            isolation: isolate;
+        }
+
+        .eb-canvas-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .eb-canvas {
+            display: block;
+        }
+
+        .eb-content {
+            position: relative;
+            border-radius: inherit;
+            z-index: 1;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 28px;
+            height: 100%;
+            text-align: left;
+        }
+
+        .eb-layers {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .eb-glow-1, .eb-glow-2, .eb-background-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        .eb-glow-1 {
+            border: 2px solid var(--electric-color-alpha);
+            filter: blur(1px);
+        }
+
+        .eb-glow-2 {
+            border: 2px solid var(--electric-color);
+            filter: blur(4px);
+        }
+
+        .eb-background-glow {
+            z-index: -1;
+            transform: scale(1.1);
+            filter: blur(32px);
+            opacity: 0.25;
+            background: linear-gradient(-30deg, var(--electric-color), transparent, var(--electric-color));
+        }
+
+        .feature-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .feature-card-desc {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 850px) {
+            .features-section {
+                grid-template-columns: 1fr;
+            }
+            .features-sidebar {
+                position: static;
+            }
+        }
     </style>
 </head>
 <body>
@@ -241,6 +369,35 @@
 
         <p class="hero-subtitle">Gateway for Repairs Inventory and Dispatch</p>
         <a href="dashboard.html" class="cta-btn">Launch Live Dashboard</a>
+    </div>
+
+    <div class="features-section">
+        <div class="features-sidebar">
+            <h2>Our Features</h2>
+            <div class="features-line"></div>
+        </div>
+
+        <div class="features-grid">
+            <div class="electric-border-card" data-color="#7df9ff">
+                <div class="feature-card-title">Real-time Telemetry</div>
+                <div class="feature-card-desc">Sub-second sensor telemetry syncing directly via WebSockets from ESP8266 edge devices to live web applications.</div>
+            </div>
+
+            <div class="electric-border-card" data-color="#a855f7">
+                <div class="feature-card-title">Inventory Control</div>
+                <div class="feature-card-desc">Automated component tracking, dispatch logging, and dynamic inventory sync to reduce operational overhead.</div>
+            </div>
+
+            <div class="electric-border-card" data-color="#34d399">
+                <div class="feature-card-title">Threshold Alerts</div>
+                <div class="feature-card-desc">Instant monitoring for critical temperature, humidity, and liquid level breaches with continuous diagnostic logs.</div>
+            </div>
+
+            <div class="electric-border-card" data-color="#f43f5e">
+                <div class="feature-card-title">Cloud Infrastructure</div>
+                <div class="feature-card-desc">Monolithic Express architecture hosted on Render for seamless HTTP REST endpoints and low-latency websocket routing.</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -496,10 +653,10 @@
                 offscreen.height = textHeight + padding * 2;
                 offCtx.clearRect(0, 0, offscreen.width, offscreen.height);
                 offCtx.font = font;
-                offCtx.textAlign = 'left';
-                offCtx.textBaseline = 'alphabetic';
+                offCtx.textAlign = 'center';
+                offCtx.textBaseline = 'middle';
                 offCtx.fillStyle = '#ffffff';
-                offCtx.fillText(content, padding - left, padding + ascent);
+                offCtx.fillText(content, offscreen.width / 2, offscreen.height / 2);
 
                 const imageData = offCtx.getImageData(0, 0, offscreen.width, offscreen.height);
                 const targets = [];
@@ -603,6 +760,198 @@
             const resizeObserver = new ResizeObserver(queueSample);
             resizeObserver.observe(container);
             sampleText();
+        })();
+
+        (function() {
+            const random = x => (Math.sin(x * 12.9898) * 43758.5453) % 1;
+
+            const noise2D = (x, y) => {
+                const i = Math.floor(x);
+                const j = Math.floor(y);
+                const fx = x - i;
+                const fy = y - j;
+                const a = random(i + j * 57);
+                const b = random(i + 1 + j * 57);
+                const c = random(i + (j + 1) * 57);
+                const d = random(i + 1 + (j + 1) * 57);
+                const ux = fx * fx * (3.0 - 2.0 * fx);
+                const uy = fy * fy * (3.0 - 2.0 * fy);
+                return a * (1 - ux) * (1 - uy) + b * ux * (1 - uy) + c * (1 - ux) * uy + d * ux * uy;
+            };
+
+            const octavedNoise = (x, octaves, lacunarity, gain, baseAmplitude, baseFrequency, time, seed) => {
+                let y = 0;
+                let amplitude = baseAmplitude;
+                let frequency = baseFrequency;
+                for (let i = 0; i < octaves; i++) {
+                    y += amplitude * noise2D(frequency * x + seed * 100, time * frequency * 0.3);
+                    frequency *= lacunarity;
+                    amplitude *= gain;
+                }
+                return y;
+            };
+
+            const getCornerPoint = (centerX, centerY, radius, startAngle, arcLength, progress) => {
+                const angle = startAngle + progress * arcLength;
+                return {
+                    x: centerX + radius * Math.cos(angle),
+                    y: centerY + radius * Math.sin(angle)
+                };
+            };
+
+            const getRoundedRectPoint = (t, left, top, width, height, radius) => {
+                const straightWidth = width - 2 * radius;
+                const straightHeight = height - 2 * radius;
+                const cornerArc = (Math.PI * radius) / 2;
+                const totalPerimeter = 2 * straightWidth + 2 * straightHeight + 4 * cornerArc;
+                const distance = t * totalPerimeter;
+                let accumulated = 0;
+
+                if (distance <= accumulated + straightWidth) {
+                    return { x: left + radius + ((distance - accumulated) / straightWidth) * straightWidth, y: top };
+                }
+                accumulated += straightWidth;
+
+                if (distance <= accumulated + cornerArc) {
+                    return getCornerPoint(left + width - radius, top + radius, radius, -Math.PI / 2, Math.PI / 2, (distance - accumulated) / cornerArc);
+                }
+                accumulated += cornerArc;
+
+                if (distance <= accumulated + straightHeight) {
+                    return { x: left + width, y: top + radius + ((distance - accumulated) / straightHeight) * straightHeight };
+                }
+                accumulated += straightHeight;
+
+                if (distance <= accumulated + cornerArc) {
+                    return getCornerPoint(left + width - radius, top + height - radius, radius, 0, Math.PI / 2, (distance - accumulated) / cornerArc);
+                }
+                accumulated += cornerArc;
+
+                if (distance <= accumulated + straightWidth) {
+                    return { x: left + width - radius - ((distance - accumulated) / straightWidth) * straightWidth, y: top + height };
+                }
+                accumulated += straightWidth;
+
+                if (distance <= accumulated + cornerArc) {
+                    return getCornerPoint(left + radius, top + height - radius, radius, Math.PI / 2, Math.PI / 2, (distance - accumulated) / cornerArc);
+                }
+                accumulated += cornerArc;
+
+                if (distance <= accumulated + straightHeight) {
+                    return { x: left, y: top + height - radius - ((distance - accumulated) / straightHeight) * straightHeight };
+                }
+                accumulated += straightHeight;
+
+                return getCornerPoint(left + radius, top + radius, radius, Math.PI, Math.PI / 2, (distance - accumulated) / cornerArc);
+            };
+
+            const cardElements = document.querySelectorAll('.electric-border-card');
+
+            cardElements.forEach(cardEl => {
+                const color = cardEl.getAttribute('data-color') || '#5227FF';
+                const speed = 1;
+                const chaos = 0.12;
+                const borderRadius = 24;
+
+                const originalHtml = cardEl.innerHTML;
+                cardEl.className = 'electric-border';
+                cardEl.style.setProperty('--electric-color', color);
+                cardEl.style.setProperty('--electric-color-alpha', color + '99');
+                cardEl.style.borderRadius = borderRadius + 'px';
+
+                cardEl.innerHTML = `
+                    <div class="eb-canvas-container">
+                        <canvas class="eb-canvas"></canvas>
+                    </div>
+                    <div class="eb-layers">
+                        <div class="eb-glow-1"></div>
+                        <div class="eb-glow-2"></div>
+                        <div class="eb-background-glow"></div>
+                    </div>
+                    <div class="eb-content">${originalHtml}</div>
+                `;
+
+                const canvas = cardEl.querySelector('.eb-canvas');
+                const ctx = canvas.getContext('2d');
+                let time = 0;
+                let lastFrameTime = performance.now();
+                const borderOffset = 60;
+                const displacement = 60;
+
+                const updateSize = () => {
+                    const rect = cardEl.getBoundingClientRect();
+                    const width = rect.width + borderOffset * 2;
+                    const height = rect.height + borderOffset * 2;
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    canvas.width = width * dpr;
+                    canvas.height = height * dpr;
+                    canvas.style.width = `${width}px`;
+                    canvas.style.height = `${height}px`;
+                    ctx.scale(dpr, dpr);
+                    return { width, height };
+                };
+
+                let { width, height } = updateSize();
+
+                const drawElectricBorder = currentTime => {
+                    const deltaTime = (currentTime - lastFrameTime) / 1000;
+                    time += deltaTime * speed;
+                    lastFrameTime = currentTime;
+
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.scale(dpr, dpr);
+
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
+                    const left = borderOffset;
+                    const top = borderOffset;
+                    const borderWidth = width - 2 * borderOffset;
+                    const borderHeight = height - 2 * borderOffset;
+                    const maxRadius = Math.min(borderWidth, borderHeight) / 2;
+                    const radius = Math.min(borderRadius, maxRadius);
+
+                    const approximatePerimeter = 2 * (borderWidth + borderHeight) + 2 * Math.PI * radius;
+                    const sampleCount = Math.floor(approximatePerimeter / 2);
+
+                    ctx.beginPath();
+
+                    for (let i = 0; i <= sampleCount; i++) {
+                        const progress = i / sampleCount;
+                        const point = getRoundedRectPoint(progress, left, top, borderWidth, borderHeight, radius);
+
+                        const xNoise = octavedNoise(progress * 8, 10, 1.6, 0.7, chaos, 10, time, 0);
+                        const yNoise = octavedNoise(progress * 8, 10, 1.6, 0.7, chaos, 10, time, 1);
+
+                        const displacedX = point.x + xNoise * displacement;
+                        const displacedY = point.y + yNoise * displacement;
+
+                        if (i === 0) {
+                            ctx.moveTo(displacedX, displacedY);
+                        } else {
+                            ctx.lineTo(displacedX, displacedY);
+                        }
+                    }
+
+                    ctx.closePath();
+                    ctx.stroke();
+
+                    requestAnimationFrame(drawElectricBorder);
+                };
+
+                const resizeObserver = new ResizeObserver(() => {
+                    const newSize = updateSize();
+                    width = newSize.width;
+                    height = newSize.height;
+                });
+                resizeObserver.observe(cardEl);
+
+                requestAnimationFrame(drawElectricBorder);
+            });
         })();
     </script>
 </body>
