@@ -219,6 +219,72 @@
             box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
         }
 
+        .about-section {
+            width: 90%;
+            max-width: 1000px;
+            margin-top: 100px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .about-card {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 48px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 60%);
+            animation: rotateGlow 6s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .about-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .about-paragraph {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            line-height: 1.9;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            font-weight: 400;
+        }
+
+        .highlight-blue {
+            color: #38bdf8;
+            font-weight: 700;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+        }
+
         .features-section {
             width: 90%;
             max-width: 1100px;
@@ -334,6 +400,114 @@
             line-height: 1.5;
         }
 
+        .faq-section {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 140px;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .faq-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .faq-subtitle {
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 1.05rem;
+        }
+
+        .faq-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .faq-item {
+            position: relative;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .faq-item::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #c084fc, #38bdf8, #a855f7);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+
+        .faq-item:hover::before, .faq-item.active::before {
+            opacity: 1;
+        }
+
+        .faq-inner {
+            position: relative;
+            z-index: 1;
+            background: #0b0f19;
+            border-radius: 15px;
+            padding: 22px 28px;
+        }
+
+        .faq-question {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .faq-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(168, 85, 247, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c084fc;
+            font-size: 1.2rem;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(135deg);
+            background: rgba(168, 85, 247, 0.4);
+            color: #ffffff;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, padding-top 0.4s ease;
+            color: #94a3b8;
+            font-size: 0.98rem;
+            line-height: 1.6;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 200px;
+            opacity: 1;
+            padding-top: 16px;
+        }
+
         @media (max-width: 850px) {
             .features-section {
                 grid-template-columns: 1fr;
@@ -371,6 +545,15 @@
         <a href="dashboard.html" class="cta-btn">Launch Live Dashboard</a>
     </div>
 
+    <div class="about-section">
+        <div class="about-card">
+            <h2 class="about-title">ABOUT GRID</h2>
+            <p class="about-paragraph">
+                Think of GRID as an <span class="highlight-blue">intelligent digital security guard for your entire building</span>. Designed for building owners, housing societies and busy office spaces, GRID keeps a continuous eye on your building’s electrical health to catch tiny maintenance hiccups before they turn into expensive disasters. It works by <span class="highlight-blue">listening to electrical signals in real time instantly stepping in during short circuits to cut off power before sparks can start dangerous electrical fires</span>, while automatically smoothing out dangerous voltage spikes to keep your valuable appliances running safely for years. Beyond power management, GRID <span class="highlight-blue">continuously scans your facility using HVAC air pressure and humidity sensors to optimize climate control</span>, combined with high precision water pressure sensors to <span class="highlight-blue">instantly flag hidden pipe leaks before flooding causes structural damage</span>.
+            </p>
+        </div>
+    </div>
+
     <div class="features-section">
         <div class="features-sidebar">
             <h2>Our Features</h2>
@@ -380,7 +563,7 @@
         <div class="features-grid">
             <div class="electric-border-card" data-color="#7df9ff">
                 <div class="feature-card-title">Real-time Telemetry</div>
-                <div class="feature-card-desc">Sub-second sensor telemetry syncing directly via WebSockets from ESP8266 edge devices to live web applications.</div>
+                <div class="feature-card-desc">Sub-second sensor telemetry syncing directly via WebSockets from edge devices to live web applications.</div>
             </div>
 
             <div class="electric-border-card" data-color="#a855f7">
@@ -400,6 +583,61 @@
         </div>
     </div>
 
+    <div class="faq-section">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <p class="faq-subtitle">Everything you need to know about the GRID telemetry system</p>
+
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-inner">
+                    <div class="faq-question">
+                        <span>How does GRID connect with physical hardware?</span>
+                        <div class="faq-icon">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        GRID interfaces directly with microcontrollers and single-board computers including ESP8266, ESP32, STM32, and Raspberry Pi via HTTP REST endpoints and WebSockets, relaying real-time sensor payloads effortlessly.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-inner">
+                    <div class="faq-question">
+                        <span>What all sensors can it support in the future?</span>
+                        <div class="faq-icon">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        We are currently demoing water level indicators and HVAC humidity sensors, but GRID is designed to support virtually any sensor architecture running on ARM64 platforms.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-inner">
+                    <div class="faq-question">
+                        <span>Is the backend scalable for large inventory networks?</span>
+                        <div class="faq-icon">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, built on Node.js Express hosted on Render cloud infrastructure, GRID handles fast concurrent websocket connections effortlessly.
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-inner">
+                    <div class="faq-question">
+                        <span>How can I test the system before deploying hardware?</span>
+                        <div class="faq-icon">+</div>
+                    </div>
+                    <div class="faq-answer">
+                        You can send test JSON payloads via tools like Postman directly to the <code>/api/telemetry</code> endpoint to watch the dashboard update live.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const links = document.querySelectorAll(".nav-link");
         const current = window.location.pathname.split("/").pop() || "index.html";
@@ -412,6 +650,17 @@
             link.addEventListener("click", function () {
                 links.forEach(l => l.classList.remove("active"));
                 this.classList.add("active");
+            });
+        });
+
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                faqItems.forEach(i => i.classList.remove('active'));
+                if (!isActive) {
+                    item.classList.add('active');
+                }
             });
         });
 
@@ -850,7 +1099,7 @@
             cardElements.forEach(cardEl => {
                 const color = cardEl.getAttribute('data-color') || '#5227FF';
                 const speed = 1;
-                const chaos = 0.12;
+                const chaos = 0.1;
                 const borderRadius = 24;
 
                 const originalHtml = cardEl.innerHTML;
