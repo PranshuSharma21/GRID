@@ -398,7 +398,7 @@
         </div>
 
         <div class="alert-banner" id="alertBanner">
-            ⚠️ CRITICAL ALERT: Low Water Pressure Detected! Check physical supply valve.
+            ⚠️ CRITICAL ALERT: Threshold anomaly detected in your unit! Automated safety protocols active.
         </div>
 
         <div class="grid-metrics">
@@ -469,6 +469,8 @@
     </button>
 
     <script>
+        const SERVER_URL = "https://grid-ygrx.onrender.com";
+
         const links = document.querySelectorAll(".nav-link");
         const current = window.location.pathname.split("/").pop() || "dashboard.html";
 
@@ -584,17 +586,17 @@
             setHardwareOnline();
             let isAlert = false;
 
-            const waterVal = data.waterPressure !== undefined ? data.waterPressure : data.water;
+            const waterVal = data.water_level !== undefined ? data.water_level : (data.waterPressure !== undefined ? data.waterPressure : data.water);
             if (waterVal !== undefined && waterVal !== null) {
-                valWater.innerText = `${waterVal} PSI`;
+                valWater.innerText = `${waterVal}`;
                 pushChartData(chartWater, waterVal);
                 
-                if (waterVal < 20) {
-                    statusWater.innerText = "Low Pressure / Leak Risk";
+                if (waterVal > 300) {
+                    statusWater.innerText = "High Water / Leak Risk";
                     statusWater.style.color = "#f43f5e";
                     isAlert = true;
                 } else {
-                    statusWater.innerText = "Optimal Sensor Pressure";
+                    statusWater.innerText = "Normal Water Level";
                     statusWater.style.color = "#34d399";
                 }
             }
@@ -619,12 +621,12 @@
 
         async function fetchLatestData() {
             try {
-                const res = await fetch("https://grid-telemetry.onrender.com/api/telemetry/latest");
+                const res = await fetch(`${SERVER_URL}/api/telemetry/latest`);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && (data.waterPressure !== null || data.water !== null || data.humidity !== null || data.hum !== null)) {
+                    if (data && (data.water_level !== null || data.waterPressure !== null || data.humidity !== null)) {
                         updateTelemetryUI(data);
-                        addLog(`Polled latest ESP data: Water=${data.waterPressure || data.water || '--'}, Hum=${data.humidity || data.hum || '--'}%`);
+                        addLog(`Polled ESP data: Temp=${data.temperature ?? data.temp ?? '--'}°C, Hum=${data.humidity ?? data.hum ?? '--'}%, Water=${data.water_level ?? data.waterPressure ?? '--'}`);
                     }
                 }
             } catch (err) {
@@ -644,14 +646,20 @@
         setInterval(fetchLatestData, 3000);
         fetchLatestData();
 
-        const socket = io("https://grid-telemetry.onrender.com", {
+        const socket = io(SERVER_URL, {
             transports: ["websocket", "polling"],
             reconnection: true
         });
 
         socket.on("telemetry_update", (data) => {
             updateTelemetryUI(data);
-            addLog(`WebSocket Packet: Water=${data.waterPressure || data.water || '--'}, Hum=${data.humidity || data.hum || '--'}%`);
+            addLog(`WebSocket Packet: Temp=${data.temperature ?? data.temp ?? '--'}°C, Hum=${data.humidity ?? data.hum ?? '--'}%, Water=${data.water_level ?? data.waterPressure ?? '--'}`);
+        });
+
+        socket.on("sensor_update", (payload) => {
+            if (payload && payload.telemetry) {
+                updateTelemetryUI(payload.telemetry);
+            }
         });
 
         function addLog(message) {
