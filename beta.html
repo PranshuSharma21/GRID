@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRID - Beta Version</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #030014;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(168, 85, 247, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(168, 85, 247, 0.07) 1px, transparent 1px);
+            z-index: -2;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(120, 53, 15, 0) 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: pulseGlow 8s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+            50% { transform: translate(-45%, -55%) scale(1.2); opacity: 0.85; }
+            100% { transform: translate(-55%, -45%) scale(1); opacity: 0.6; }
+        }
+
+        .nav-container {
+            margin-top: 30px;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+
+        .nav-box {
+            display: inline-flex;
+            gap: 16px;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 999px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #111;
+            font-size: 18px;
+            padding: 16px 32px;
+            border-radius: 999px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+            transition: 0.6s;
+            z-index: 1;
+        }
+
+        .nav-link:hover::before, .nav-link.active::before { opacity: 1; }
+        .nav-link:hover::after { left: 120%; }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.5);
+        }
+
+        .nav-link span { position: relative; z-index: 2; }
+
+        .beta-section {
+            width: 90%;
+            max-width: 750px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .beta-card {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            padding: 56px 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .beta-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 60%);
+            animation: rotateGlow 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotateGlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #c084fc;
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .beta-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .beta-subtitle {
+            font-size: 1.15rem;
+            color: #94a3b8;
+            max-width: 550px;
+            margin: 0 auto 40px auto;
+            line-height: 1.7;
+        }
+
+        .notify-form {
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .notify-input {
+            flex: 1;
+            background: rgba(2, 6, 23, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 999px;
+            padding: 14px 22px;
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .notify-input:focus {
+            border-color: #c084fc;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+            background: rgba(2, 6, 23, 0.95);
+        }
+
+        .notify-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .notify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
+        }
+
+        @media (max-width: 600px) {
+            .notify-form {
+                flex-direction: column;
+            }
+            .beta-title {
+                font-size: 2.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="nav-container">
+        <div class="nav-box">
+            <a href="index.html" class="nav-link"><span>Home</span></a>
+            <a href="about.html" class="nav-link"><span>About Us</span></a>
+            <a href="dashboard.html" class="nav-link"><span>Dashboard</span></a>
+            <a href="contact.html" class="nav-link"><span>Contact Us</span></a>
+            <a href="beta.html" class="nav-link"><span>Beta Version</span></a>
+        </div>
+    </div>
+
+    <div class="beta-section">
+        <div class="beta-card">
+            <div class="badge">In Development</div>
+            <h1 class="beta-title">COMING SOON</h1>
+            <p class="beta-subtitle">We are currently crafting GRID 2.0 with advanced predictive AI models and real time automated relay triggers. Be the first to know when early access opens.</p>
+
+            <form action="https://formspree.io/f/mbgrgzgo" method="POST" class="notify-form">
+                <input type="email" name="email" class="notify-input" placeholder="Enter your email" required>
+                <button type="submit" class="notify-btn">Notify Me</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const links = document.querySelectorAll(".nav-link");
+        const current = window.location.pathname.split("/").pop() || "beta.html";
+
+        links.forEach(link => {
+            if (link.getAttribute("href") === current) {
+                link.classList.add("active");
+            }
+            link.addEventListener("click", function () {
+                links.forEach(l => l.classList.remove("active"));
+                this.classList.add("active");
+            });
+        });
+    </script>
+</body>
+</html>
